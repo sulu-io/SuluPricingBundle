@@ -66,7 +66,42 @@ class PricingControllerTest extends BaseTestCase
 
         $client = $this->createAuthenticatedClient();
         $client->request(
-            'POST', '/api/pricings', [
+            'POST',
+            '/api/pricings',
+            [
+                'taxfree' => true,
+                'currency' => 'EUR',
+                'items' => $itemData
+            ]
+        );
+
+        $response = $client->getResponse();
+        $this->assertEquals(200, $response->getStatusCode(), $response->getContent());
+        $response = json_decode($response->getContent());
+
+        $totalNetPrice = $itemData[0]['price'] * $itemData[0]['quantity'];
+        $this->assertEquals($itemData[0]['price'], $response->items[0]->price);
+        $this->assertEquals($totalNetPrice, $response->items[0]->totalNetPrice);
+        // Since the taxfree flag is true, the net price equals the total price
+        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
+        $this->assertEquals($totalNetPrice, $response->totalPrice);
+    }
+
+    /**
+     * Simple test for brutto prices.
+     */
+    public function testSimpleBruttoPricing()
+    {
+        $itemData = [
+            $this->getItemSampleData(1, 2),
+            $this->getItemSampleData(2, 1)
+        ];
+
+        $client = $this->createAuthenticatedClient();
+        $client->request(
+            'POST',
+            '/api/pricings',
+            [
                 'taxfree' => false,
                 'currency' => 'EUR',
                 'items' => $itemData
@@ -77,8 +112,17 @@ class PricingControllerTest extends BaseTestCase
         $this->assertEquals(200, $response->getStatusCode(), $response->getContent());
         $response = json_decode($response->getContent());
 
-        $this->assertEquals($itemData[0]['price'], $response[0]->price);
-        $this->assertEquals($itemData[0]['price'] * $itemData[0]['quantity'], $response[0]->totalNetPrice);
+        $totalNetPrice1 = $itemData[0]['price'] * $itemData[0]['quantity'];
+        $totalNetPrice2 = $itemData[1]['price'] * $itemData[1]['quantity'];
+        $totalNetPrice = $totalNetPrice1 + $totalNetPrice2;
+
+        $this->assertEquals($itemData[0]['price'], $response->items[0]->price);
+
+        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
+        $this->assertEquals($totalNetPrice += $totalNetPrice * 0.2, $response->totalPrice);
+
+        $taxes = get_object_vars($response->taxes);
+        $this->assertEquals($taxes['20'], 13.14);
     }
 
     /**
@@ -94,8 +138,10 @@ class PricingControllerTest extends BaseTestCase
 
         $client = $this->createAuthenticatedClient();
         $client->request(
-            'POST', '/api/pricings', [
-                'taxfree' => false,
+            'POST',
+            '/api/pricings',
+            [
+                'taxfree' => true,
                 'currency' => 'EUR',
                 'items' => $itemData
             ]
@@ -105,13 +151,17 @@ class PricingControllerTest extends BaseTestCase
         $this->assertEquals(200, $response->getStatusCode(), $response->getContent());
         $response = json_decode($response->getContent());
 
+        $totalNetPrice = 0;
         foreach ($itemData as $index => $data) {
-            $this->assertEquals($itemData[$index]['price'], $response[$index]->price);
+            $this->assertEquals($itemData[$index]['price'], $response->items[$index]->price);
             $this->assertEquals(
                 $itemData[$index]['price'] * $itemData[$index]['quantity'],
-                $response[$index]->totalNetPrice
+                $response->items[$index]->totalNetPrice
             );
+            $totalNetPrice += $response->items[$index]->totalNetPrice;
         }
+
+        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
     }
 
     /**
@@ -119,18 +169,18 @@ class PricingControllerTest extends BaseTestCase
      *
      * @return array
      */
-    private function getItemSampleData()
+    private function getItemSampleData($productId = 1, $quantity = 1.0)
     {
         return [
             'id' => 1,
             'name' => 'name',
-            'quantity' => 2.0,
+            'quantity' => $quantity,
             'quantityUnit' => 'pc',
             'useProductsPrice' => false,
-            'price' => (float)(rand(1, 999) / 100),
+            'price' => 21.90,
             'discount' => 0,
             'product' => [
-                'id' => 1,
+                'id' => $productId,
             ],
         ];
     }

@@ -37,7 +37,7 @@ class PricingController extends RestController implements ClassResourceInterface
 
             $prices = $this->calculateItemPrices($data['items'], $data['currency'], $data['taxfree'], $locale);
 
-            $view = $this->view($prices['items'], 200);
+            $view = $this->view($prices, 200);
         } catch (OrderDependencyNotFoundException $exc) {
             $exception = new EntityNotFoundException($exc->getEntityName(), $exc->getId());
             $view = $this->view($exception->toArray(), 400);
@@ -63,9 +63,12 @@ class PricingController extends RestController implements ClassResourceInterface
      */
     private function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
     {
+        // TODO: Move logic to the manager
         $calculator = $this->getItemPriceCalculator();
+        $totalNetPrice = 0;
         $totalPrice = 0;
         $items = [];
+        $taxes = [];
 
         foreach ($itemsData as $itemData) {
             $useProductsPrice = false;
@@ -79,12 +82,24 @@ class PricingController extends RestController implements ClassResourceInterface
             $item->setPrice($itemPrice);
             $item->setTotalNetPrice($itemTotalPrice);
 
+            // Calculate Taxes
+            $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
+            $totalPrice += $itemPrice * $item->getCalcQuantity() + $taxValue;
+            $tax = (string)$item->getTax();
+            if (array_key_exists($tax, $taxes)) {
+                $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
+            } else {
+                $taxes[$tax] = $taxValue;
+            }
+
             $items[] = $item;
-            $totalPrice += $itemPrice;
+            $totalNetPrice += $itemTotalPrice;
         }
 
         return [
-            'total' => $totalPrice,
+            'totalNetPrice' => $totalNetPrice,
+            'taxes' => $taxes,
+            'totalPrice' => $totalPrice,
             'items' => $items,
         ];
     }
