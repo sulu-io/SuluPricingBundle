@@ -11,10 +11,11 @@
 namespace Sulu\Bundle\PricingBundle\Controller;
 
 use FOS\RestBundle\Routing\ClassResourceInterface;
-use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 use Symfony\Component\HttpFoundation\Request;
-use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
+use Symfony\Component\HttpFoundation\Response;
 use Sulu\Component\Rest\RestController;
+use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
+use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
 
 /**
  * Handles price calculations by api.
@@ -26,24 +27,19 @@ class PricingController extends RestController implements ClassResourceInterface
      *
      * @param Request $request
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      */
     public function postAction(Request $request)
     {
         try {
             $data = $request->request->all();
-
+            $this->validatePostData($data);
             $locale = $this->getLocale($request);
 
-            $prices = $this->calculateItemPrices($data['items'], $data['currency'], $data['taxfree'], $locale);
+            // Calculate prices for all given items.
+            $prices = $this->calculateItemPrices($data['items'], $data['currency'], $locale);
 
             $view = $this->view($prices, 200);
-        } catch (OrderDependencyNotFoundException $exc) {
-            $exception = new EntityNotFoundException($exc->getEntityName(), $exc->getId());
-            $view = $this->view($exception->toArray(), 400);
-        } catch (MissingOrderAttributeException $exc) {
-            $exception = new MissingArgumentException(self::$orderEntityName, $exc->getAttribute());
-            $view = $this->view($exception->toArray(), 400);
         } catch (PriceCalculationException $pce) {
             $view = $this->view($pce->getMessage(), 400);
         }
@@ -56,12 +52,11 @@ class PricingController extends RestController implements ClassResourceInterface
      *
      * @param array $itemsData
      * @param string $currency
-     * @param bool $taxfree
      * @param string $locale
      *
      * @return array
      */
-    private function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
+    private function calculateItemPrices($itemsData, $currency, $locale)
     {
         // TODO: Move logic to the manager
         $calculator = $this->getItemPriceCalculator();
@@ -76,6 +71,10 @@ class PricingController extends RestController implements ClassResourceInterface
                 $useProductsPrice = $itemData['useProductsPrice'];
             }
 
+
+            $itemData = $this->setDefaultData($itemData);
+            $itemData = $this->unsetUneccesaryData($itemData);
+
             $item = $this->getItemManager()->save($itemData, $locale);
             $itemPrice = $calculator->getItemPrice($item, $currency, $useProductsPrice);
             $itemTotalPrice = $calculator->calculate($item, $currency, $useProductsPrice);
@@ -86,10 +85,9 @@ class PricingController extends RestController implements ClassResourceInterface
             $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
             $totalPrice += $itemPrice * $item->getCalcQuantity() + $taxValue;
             $tax = (string)$item->getTax();
+            $taxes[$tax] = $taxValue;
             if (array_key_exists($tax, $taxes)) {
                 $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
-            } else {
-                $taxes[$tax] = $taxValue;
             }
 
             $items[] = $item;
@@ -102,6 +100,60 @@ class PricingController extends RestController implements ClassResourceInterface
             'totalPrice' => $totalPrice,
             'items' => $items,
         ];
+    }
+
+    /**
+     * Unsets all data from array that's not needed for price calculation.
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    private function unsetUneccesaryData($data)
+    {
+        if (isset($data['deliveryDate'])) {
+            unset($data['deliveryDate']);
+        }
+        if (isset($data['deliveryAddress'])) {
+            unset($data['deliveryAddress']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Sets default data to data array, if needed for price calculation
+     *
+     * @param array $data
+     *
+     * @return array
+     */
+    private function setDefaultData($data)
+    {
+        // Quantity unit is not necessary for price calculation, so just set it.
+        if (empty($data['quantityUnit'])) {
+            $data['quantityUnit'] = '';
+        }
+
+        return $data;
+    }
+
+    /**
+     * Checks if all necessary data for post request is set.
+     *
+     * @param array $data
+     *
+     * @throws PriceCalculationException
+     */
+    private function validatePostData($data)
+    {
+        $required = ['items', 'currency'];
+
+        foreach ($required as $field) {
+            if (!isset($data[$field]) && !is_null($data[$field])) {
+                throw new PriceCalculationException($field . ' is required but not set properly');
+            }
+        }
     }
 
     /**
