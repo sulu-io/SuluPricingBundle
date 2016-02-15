@@ -36,8 +36,14 @@ class PricingController extends RestController implements ClassResourceInterface
             $this->validatePostData($data);
             $locale = $this->getLocale($request);
 
+            // Set taxfree to false by default.
+            $taxfree = false;
+            if (isset($data['taxfree'])) {
+                $taxfree = $data['taxfree'];
+            }
+
             // Calculate prices for all given items.
-            $prices = $this->calculateItemPrices($data['items'], $data['currency'], $locale);
+            $prices = $this->calculateItemPrices($data['items'], $data['currency'], $taxfree, $locale);
 
             $view = $this->view($prices, 200);
         } catch (PriceCalculationException $pce) {
@@ -56,7 +62,7 @@ class PricingController extends RestController implements ClassResourceInterface
      *
      * @return array
      */
-    private function calculateItemPrices($itemsData, $currency, $locale)
+    private function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
     {
         // TODO: Move logic to the manager
         $calculator = $this->getItemPriceCalculator();
@@ -71,7 +77,7 @@ class PricingController extends RestController implements ClassResourceInterface
                 $useProductsPrice = $itemData['useProductsPrice'];
             }
 
-
+            // Add and remove necessary data for calculation.
             $itemData = $this->setDefaultData($itemData);
             $itemData = $this->unsetUneccesaryData($itemData);
 
@@ -81,13 +87,18 @@ class PricingController extends RestController implements ClassResourceInterface
             $item->setPrice($itemPrice);
             $item->setTotalNetPrice($itemTotalPrice);
 
-            // Calculate Taxes
-            $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
-            $totalPrice += $itemPrice * $item->getCalcQuantity() + $taxValue;
-            $tax = (string)$item->getTax();
-            $taxes[$tax] = $taxValue;
-            if (array_key_exists($tax, $taxes)) {
-                $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
+            $totalPrice += $itemTotalPrice;
+
+            // Calculate Taxes.
+            if (!$taxfree) {
+                $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
+                $totalPrice += $taxValue;
+                $tax = (string)$item->getTax();
+                if (array_key_exists($tax, $taxes)) {
+                    $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
+                } else {
+                    $taxes[$tax] = $taxValue;
+                }
             }
 
             $items[] = $item;
@@ -122,7 +133,7 @@ class PricingController extends RestController implements ClassResourceInterface
     }
 
     /**
-     * Sets default data to data array, if needed for price calculation
+     * Sets default data to data array, if needed for price calculation.
      *
      * @param array $data
      *

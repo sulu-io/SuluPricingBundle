@@ -80,11 +80,27 @@ class PricingControllerTest extends BaseTestCase
         $response = json_decode($response->getContent());
 
         $totalNetPrice = $itemData[0]['price'] * $itemData[0]['quantity'];
-        $this->assertEquals($itemData[0]['price'], $response->items[0]->price);
-        $this->assertEquals($totalNetPrice, $response->items[0]->totalNetPrice);
+        $this->assertEquals(
+            $itemData[0]['price'],
+            $response->items[0]->price,
+            'Wrong item price'
+        );
+        $this->assertEquals(
+            $totalNetPrice,
+            $response->items[0]->totalNetPrice,
+            'Wrong item net price'
+        );
         // Since the taxfree flag is true, the net price equals the total price
-        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
-        $this->assertEquals($totalNetPrice, $response->totalPrice);
+        $this->assertEquals(
+            $totalNetPrice,
+            $response->totalNetPrice,
+            'Wrong total net price'
+        );
+        $this->assertEquals(
+            $totalNetPrice,
+            $response->totalPrice,
+            'Wrong total price'
+        );
     }
 
     /**
