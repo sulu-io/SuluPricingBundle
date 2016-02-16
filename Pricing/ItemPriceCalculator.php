@@ -55,7 +55,9 @@ class ItemPriceCalculator
     {
         $priceValue = $this->getItemPrice($item, $currency, $useProductsPrice);
 
-        $this->validateNotNull('price', $priceValue);
+        if ($priceValue === null) {
+            $priceValue = 0;
+        }
 
         if ($item->getPrice() && $item->getPrice() !== $priceValue) {
             $item->setPriceChange($item->getPrice(), $priceValue);
