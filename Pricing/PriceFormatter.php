@@ -91,6 +91,27 @@ class PriceFormatter
     }
 
     /**
+     * @param float $float
+     * @param string $locale
+     *
+     * @throws PriceFormatterException
+     *
+     * @return string
+     */
+    public function formatToWholeNumbers(
+        $float,
+        $locale = null
+    ) {
+        if (is_null($locale)) {
+            $locale = $this->defaultLocale;
+        }
+
+        $formatter = $this->retrieveDecimalFormatter($locale);
+
+        return $formatter->format($float);
+    }
+
+    /**
      * @param string $locale
      * @param int $digits
      *
@@ -98,10 +119,22 @@ class PriceFormatter
      */
     protected function getFormatter($locale, $digits)
     {
-        $formatter = new \NumberFormatter($locale, NumberFormatter::DECIMAL);
+        $formatter = $this->retrieveDecimalFormatter($locale);
         $formatter->setAttribute(NumberFormatter::MIN_FRACTION_DIGITS, $digits);
         $formatter->setAttribute(NumberFormatter::MAX_FRACTION_DIGITS, $digits);
         $formatter->setAttribute(NumberFormatter::DECIMAL_ALWAYS_SHOWN, 1);
+
+        return $formatter;
+    }
+
+    /**
+     * @param string $locale
+     *
+     * @return NumberFormatter
+     */
+    protected function retrieveDecimalFormatter($locale)
+    {
+        $formatter = new \NumberFormatter($locale, NumberFormatter::DECIMAL);
 
         return $formatter;
     }
