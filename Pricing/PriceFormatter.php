@@ -92,7 +92,7 @@ class PriceFormatter
 
     /**
      * @param float $float
-     * @param string $locale
+     * @param string | null $locale
      *
      * @throws PriceFormatterException
      *
