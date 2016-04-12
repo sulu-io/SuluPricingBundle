@@ -112,7 +112,7 @@ class ItemPriceCalculator
      *
      * @return string
      */
-    public function formatPrice($price, $currency, $locale = 'de')
+    public function formatPrice($price, $currency, $locale = null)
     {
         return $this->priceManager->getFormattedPrice($price, $currency, $locale);
     }
