@@ -1,0 +1,43 @@
+{
+    "name": "sulu/pricing-bundle",
+    "type": "sulu-bundle",
+    "description": "TODO",
+    "license": "MIT",
+    "keywords": ["TODO"],
+    "authors": [
+        {
+            "name": "Sulu Community",
+            "homepage": "https://github.com/massiveart/SuluPricingBundle/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.4",
+        "doctrine/orm": "2.5.*",
+        "oro/doctrine-extensions": "1.0.*",
+        "symfony-cmf/routing-bundle": "1.2.*",
+
+        "sulu/sulu": "~1.1",
+
+        "jackalope/jackalope-doctrine-dbal": "~1.2.0",
+        "jackalope/jackalope-jackrabbit": "~1.2.0"
+    },
+    "require-dev": {
+        "sensio/framework-extra-bundle": "~3.0",
+        "symfony/symfony": "~2.5",
+        "symfony/monolog-bundle": "2.4.*",
+        "phpunit/phpunit": "4.1.*",
+
+        "sulu/product-bundle": "~0.1",
+        "sulu/sulu-sales": "dev-develop",
+        "sulu/contact-extension-bundle": "~0.1",
+
+        "symfony-cmf/testing": "~1.2",
+        "evenement/evenement": "2.0.0 as 1.0.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Sulu\\Bundle\\PricingBundle": ""
+        }
+    },
+    "target-dir": "Sulu/Bundle/PricingBundle"
+}
