@@ -40,7 +40,7 @@ class PricingControllerTest extends BaseTestCase
      */
     public function setUp()
     {
-        $this->em = $this->db('ORM')->getOm();
+        $this->em = $this->getEntityManager();
         $this->purgeDatabase();
         $this->setUpTestData();
         $this->em->flush();
@@ -52,7 +52,7 @@ class PricingControllerTest extends BaseTestCase
      */
     protected function setUpTestData()
     {
-        $this->productData = new ProductTestData($this->container);
+        $this->productData = new ProductTestData($this->getContainer());
     }
 
     /**
@@ -90,7 +90,7 @@ class PricingControllerTest extends BaseTestCase
             $response->items[0]->totalNetPrice,
             'Wrong item net price'
         );
-        // Since the taxfree flag is true, the net price equals the total price
+        // Since the taxfree flag is true, the net price equals the total price.
         $this->assertEquals(
             $totalNetPrice,
             $response->totalNetPrice,

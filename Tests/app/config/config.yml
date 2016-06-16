@@ -1,6 +1,8 @@
 parameters:
     website_locale: de-AT
     priceformatter_digits: 2
+    shopowner: []
+    default_currency: 'EUR'
 doctrine:
     orm:
         auto_generate_proxy_classes: %kernel.debug%

@@ -46,8 +46,7 @@ class ItemPriceCalculator
      * @param CalculableBulkPriceItemInterface $item
      * @param string|null $currency
      * @param bool|null $useProductsPrice
-     *
-     * @throws PriceCalculationException
+     * @param bool $isGrossPrice
      *
      * @return float
      */
@@ -82,8 +81,9 @@ class ItemPriceCalculator
      * @param null|bool $useProductsPrice
      * @param bool $isGrossPrice
      *
-     * @return float
      * @throws PriceCalculationException
+     *
+     * @return float
      */
     public function getItemPrice($item, $currency = null, $useProductsPrice = null, $isGrossPrice = false)
     {
@@ -216,8 +216,10 @@ class ItemPriceCalculator
 
         // Check if product price is gross price and return net price instead.
         if ($product->getAreGrossPrices()) {
-            // FIXME: getTax not in interface. Needs to be fetched from product instead.
-            $priceValue -= $priceValue / $item->getTax();
+            $tax = $item->getTax();
+            if ($tax > 0) {
+                $priceValue = ($priceValue / (100 + $tax)) * 100;
+            }
         }
 
         return $priceValue;

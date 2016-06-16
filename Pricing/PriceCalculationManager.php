@@ -45,7 +45,7 @@ class PriceCalculationManager
     }
 
     /**
-     * Calculates prices of all items given in data array
+     * Calculates prices of all items given in data array.
      *
      * @param array $itemsData
      * @param string $currency
