@@ -9,45 +9,60 @@
  */
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
+use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
+
 interface CalculableBulkPriceItemInterface
 {
     /**
-     * returns price of item for a certain quantity
-     * 
-     * @return float
+     * Returns price of item for a certain quantity.
+     *
+     * @return ProductInterface
      */
     public function getCalcProduct();
 
     /**
-     * returns quantity of items
+     * Returns quantity of items.
      *
      * @return float
      */
     public function getCalcQuantity();
 
     /**
-     * returns discount in percent of an item
+     * Returns discount in percent of an item.
      *
      * @return float from 0 to 100
      */
     public function getCalcDiscount();
 
     /**
-     * returns the currency of an item
+     * Returns the currency of an item.
      *
      * @return string
      */
     public function getCalcCurrencyCode();
 
     /**
-     * get items current price
+     * Returns the tax of an item.
+     * Will be needed for calculating gross prices.
+     *
+     * @return string
+     */
+    public function getTax();
+
+    /**
+     * Get items current price.
      *
      * @return float
      */
     public function getPrice();
 
     /**
-     * set price-change to item
+     * Set price-change to item.
+     *
+     * @param float $from
+     * @param float $to
+     *
+     * @return
      */
     public function setPriceChange($from, $to);
 }

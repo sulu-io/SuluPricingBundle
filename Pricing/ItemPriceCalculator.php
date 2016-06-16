@@ -51,9 +51,9 @@ class ItemPriceCalculator
      *
      * @return float
      */
-    public function calculate($item, $currency = null, $useProductsPrice = true)
+    public function calculate($item, $currency = null, $useProductsPrice = true, $isGrossPrice = false)
     {
-        $priceValue = $this->getItemPrice($item, $currency, $useProductsPrice);
+        $priceValue = $this->getItemPrice($item, $currency, $useProductsPrice, $isGrossPrice);
 
         if ($priceValue === null) {
             $priceValue = 0;
@@ -65,10 +65,10 @@ class ItemPriceCalculator
 
         $itemPrice = $priceValue * $item->getCalcQuantity();
 
-        // calculate items discount
+        // Calculate items discount.
         $discount = ($itemPrice / 100) * $item->getCalcDiscount();
 
-        // calculate total item price
+        // Calculate total item price.
         $totalPrice = $itemPrice - $discount;
 
         return $totalPrice;
@@ -80,10 +80,12 @@ class ItemPriceCalculator
      * @param CalculableBulkPriceItemInterface $item
      * @param null|string $currency
      * @param null|bool $useProductsPrice
+     * @param bool $isGrossPrice
      *
      * @return float
+     * @throws PriceCalculationException
      */
-    public function getItemPrice($item, $currency = null, $useProductsPrice = null)
+    public function getItemPrice($item, $currency = null, $useProductsPrice = null, $isGrossPrice = false)
     {
         $currency = $this->getCurrency($currency);
 
@@ -91,13 +93,19 @@ class ItemPriceCalculator
             $useProductsPrice = $item->getUseProductsPrice();
         }
 
-        // validate item
+        // Validate item
         $this->validateItem($item);
 
         $priceValue = $item->getPrice();
 
         if ($useProductsPrice) {
             $priceValue = $this->getValidProductPriceForItem($item, $currency);
+        } elseif ($isGrossPrice) {
+            // Handle gross prices.
+            $tax = $item->getTax();
+            if ($tax > 0) {
+                $priceValue = ($priceValue / (100 + $tax)) * 100;
+            }
         }
 
         return $priceValue;
@@ -177,19 +185,19 @@ class ItemPriceCalculator
         $specialPriceValue = null;
         $bulkPriceValue = null;
 
-        //get special price
+        // Get special price.
         $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
         if ($specialPrice) {
             $specialPriceValue = $specialPrice->getPrice();
         }
 
-        //get bulk price
+        // Get bulk price.
         $bulkPrice = $this->priceManager->getBulkPriceForCurrency($product, $item->getCalcQuantity(), $currency);
         if ($bulkPrice) {
             $bulkPriceValue = $bulkPrice->getPrice();
         }
 
-        //take the smallest
+        // Take the smallest.
         if (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
             $priceValue = $specialPriceValue;
             if ($specialPriceValue > $bulkPriceValue) {
@@ -201,9 +209,15 @@ class ItemPriceCalculator
             $priceValue = $bulkPriceValue;
         }
 
-        // no price set - return 0
+        // If no price is set - return 0.
         if (empty($priceValue)) {
             return 0;
+        }
+
+        // Check if product price is gross price and return net price instead.
+        if ($product->getAreGrossPrices()) {
+            // FIXME: getTax not in interface. Needs to be fetched from product instead.
+            $priceValue -= $priceValue / $item->getTax();
         }
 
         return $priceValue;

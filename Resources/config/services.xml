@@ -5,12 +5,20 @@
         <parameter key="sulu_pricing.grouped_price_calculator.class">Sulu\Bundle\PricingBundle\Pricing\GroupedItemsPriceCalculator</parameter>
         <parameter key="sulu_pricing.item_price_calculator.class">Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator</parameter>
         <parameter key="sulu_pricing.formatter.class">Sulu\Bundle\PricingBundle\Pricing\PriceFormatter</parameter>
+        <parameter key="sulu_pricing.price_calculation_manager.class">Sulu\Bundle\PricingBundle\Pricing\PriceCalculationManager</parameter>
     </parameters>
 
     <services>
         <service id="sulu_pricing.item_price_calculator" class="%sulu_pricing.item_price_calculator.class%">
             <argument type="service" id="sulu_product.price_manager"/>
             <argument>%sulu_product.default_currency%</argument>
+        </service>
+
+        <service id="sulu_pricing.price_calculation_manager" class="%sulu_pricing.price_calculation_manager.class%">
+            <argument type="service" id="sulu_pricing.item_price_calculator"/>
+            <call method="setItemManager">
+                <argument type="expression">service(container.hasParameter('sulu_pricing.item_manager_service') ? parameter('sulu_pricing.item_manager_service') : '')</argument>
+            </call>
         </service>
 
         <service id="sulu_pricing.grouped_price_calculator" class="%sulu_pricing.grouped_price_calculator.class%">
