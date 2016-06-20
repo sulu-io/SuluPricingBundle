@@ -139,7 +139,7 @@ class PriceCalculationManager
      *
      * @return array
      */
-    private function unsetUneccesaryData($data)
+    private function unsetUneccesaryData(array $data)
     {
         if (isset($data['deliveryDate'])) {
             unset($data['deliveryDate']);
@@ -158,7 +158,7 @@ class PriceCalculationManager
      *
      * @return array
      */
-    private function setDefaultData($data)
+    private function setDefaultData(array $data)
     {
         // Quantity unit is not necessary for price calculation, so just set it.
         if (empty($data['quantityUnit'])) {
