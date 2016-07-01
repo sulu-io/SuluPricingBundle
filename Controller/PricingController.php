@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sulu\Component\Rest\RestController;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
-use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
+use Sulu\Bundle\PricingBundle\Pricing\PriceCalculationManager;
 
 /**
  * Handles price calculations by api.
@@ -23,7 +23,7 @@ use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
 class PricingController extends RestController implements ClassResourceInterface
 {
     /**
-     * Calculate pricing of an array of items
+     * Calculate pricing of an array of items.
      *
      * @param Request $request
      *
@@ -43,7 +43,12 @@ class PricingController extends RestController implements ClassResourceInterface
             }
 
             // Calculate prices for all given items.
-            $prices = $this->calculateItemPrices($data['items'], $data['currency'], $taxfree, $locale);
+            $prices = $this->getPriceCalculationManager()->calculateItemPrices(
+                $data['items'],
+                $data['currency'],
+                $taxfree,
+                $locale
+            );
 
             $view = $this->view($prices, 200);
         } catch (PriceCalculationException $pce) {
@@ -51,102 +56,6 @@ class PricingController extends RestController implements ClassResourceInterface
         }
 
         return $this->handleView($view);
-    }
-
-    /**
-     * Calculates prices of all items.
-     *
-     * @param array $itemsData
-     * @param string $currency
-     * @param string $locale
-     *
-     * @return array
-     */
-    private function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
-    {
-        // TODO: Move logic to the manager
-        $calculator = $this->getItemPriceCalculator();
-        $totalNetPrice = 0;
-        $totalPrice = 0;
-        $items = [];
-        $taxes = [];
-
-        foreach ($itemsData as $itemData) {
-            $useProductsPrice = false;
-            if (isset($itemData['useProductsPrice']) && $itemData['useProductsPrice'] == true) {
-                $useProductsPrice = $itemData['useProductsPrice'];
-            }
-
-            // Add and remove necessary data for calculation.
-            $itemData = $this->setDefaultData($itemData);
-            $itemData = $this->unsetUneccesaryData($itemData);
-
-            $item = $this->getItemManager()->save($itemData, $locale);
-            $itemPrice = $calculator->getItemPrice($item, $currency, $useProductsPrice);
-            $itemTotalPrice = $calculator->calculate($item, $currency, $useProductsPrice);
-            $item->setPrice($itemPrice);
-            $item->setTotalNetPrice($itemTotalPrice);
-
-            $totalPrice += $itemTotalPrice;
-
-            // Calculate Taxes.
-            if (!$taxfree) {
-                $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
-                $totalPrice += $taxValue;
-                $tax = (string)$item->getTax();
-                if (array_key_exists($tax, $taxes)) {
-                    $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
-                } else {
-                    $taxes[$tax] = $taxValue;
-                }
-            }
-
-            $items[] = $item;
-            $totalNetPrice += $itemTotalPrice;
-        }
-
-        return [
-            'totalNetPrice' => $totalNetPrice,
-            'taxes' => $taxes,
-            'totalPrice' => $totalPrice,
-            'items' => $items,
-        ];
-    }
-
-    /**
-     * Unsets all data from array that's not needed for price calculation.
-     *
-     * @param array $data
-     *
-     * @return array
-     */
-    private function unsetUneccesaryData($data)
-    {
-        if (isset($data['deliveryDate'])) {
-            unset($data['deliveryDate']);
-        }
-        if (isset($data['deliveryAddress'])) {
-            unset($data['deliveryAddress']);
-        }
-
-        return $data;
-    }
-
-    /**
-     * Sets default data to data array, if needed for price calculation.
-     *
-     * @param array $data
-     *
-     * @return array
-     */
-    private function setDefaultData($data)
-    {
-        // Quantity unit is not necessary for price calculation, so just set it.
-        if (empty($data['quantityUnit'])) {
-            $data['quantityUnit'] = '';
-        }
-
-        return $data;
     }
 
     /**
@@ -168,28 +77,10 @@ class PricingController extends RestController implements ClassResourceInterface
     }
 
     /**
-     * @return ItemPriceCalculator
+     * @return PriceCalculationManager
      */
-    private function getItemPriceCalculator()
+    private function getPriceCalculationManager()
     {
-        return $this->get('sulu_pricing.item_price_calculator');
-    }
-
-    /**
-     * Returns item manager if exists.
-     *
-     * @throws PriceCalculationException
-     *
-     * @return \Sulu\Bundle\Sales\CoreBundle\Item\ItemManager
-     */
-    private function getItemManager()
-    {
-        $itemManagerServiceName = $this->container->getParameter('sulu_pricing.item_manager_service');
-
-        if (!$this->has($itemManagerServiceName)) {
-            throw new PriceCalculationException(sprintf('Item manager \'%s\' not found', $itemManagerServiceName));
-        }
-
-        return $this->get($itemManagerServiceName);
+        return $this->get('sulu_pricing.price_calculation_manager');
     }
 }
