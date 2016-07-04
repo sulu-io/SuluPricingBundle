@@ -45,7 +45,7 @@ interface CalculableBulkPriceItemInterface
      * Returns the tax of an item.
      * Will be needed for calculating gross prices.
      *
-     * @return string
+     * @return float
      */
     public function getTax();
 
@@ -57,6 +57,13 @@ interface CalculableBulkPriceItemInterface
     public function getPrice();
 
     /**
+     * @param float $price
+     *
+     * @return self
+     */
+    public function setPrice($price);
+
+    /**
      * Set price-change to item.
      *
      * @param float $from
@@ -65,4 +72,14 @@ interface CalculableBulkPriceItemInterface
      * @return
      */
     public function setPriceChange($from, $to);
+
+    /**
+     * @return array[string]float
+     */
+    public function getPriceChange();
+
+    /**
+     * @return bool
+     */
+    public function getUseProductsPrice();
 }

@@ -10,16 +10,19 @@
 
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
-use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
-use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
-
 /**
  * Calculate Price of an Order
  */
 class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterface
 {
+    /**
+     * @var ItemPriceCalculator
+     */
     protected $itemPriceCalculator;
 
+    /**
+     * @param ItemPriceCalculator $itemPriceCalculator
+     */
     public function __construct(ItemPriceCalculator $itemPriceCalculator)
     {
         $this->itemPriceCalculator = $itemPriceCalculator;
@@ -33,13 +36,11 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
         &$groupPrices = array(),
         &$groupedItems = array(),
         $currency = 'EUR'
-    )
-    {
+    ) {
         $overallPrice = 0;
 
-        /** @var PriceCalcilationInterface $item */
+        /** @var CalculableBulkPriceItemInterface $item */
         foreach ($items as $item) {
-
             $itemPrice = $this->itemPriceCalculator->calculate($item, $currency, $item->getUseProductsPrice());
 
             // add total-item-price to group
@@ -72,10 +73,10 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
     /**
      * adds price to a price-group
      *
-     * @param $price
-     * @param $item
-     * @param $groupPrices
-     * @param $groupedItems
+     * @param float $price
+     * @param CalculablePriceGroupItemInterface $item
+     * @param array $groupPrices
+     * @param array $groupedItems
      *
      * @internal param $itemPriceGroup
      */

@@ -185,6 +185,9 @@ class ItemPriceCalculator
         $specialPriceValue = null;
         $bulkPriceValue = null;
 
+        // 1. addonPrice
+        
+
         // Get special price.
         $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
         if ($specialPrice) {
