@@ -188,7 +188,7 @@ class ItemPriceCalculator
 
         // Get addon price.
         if ($item->getAddon()) {
-            $addonPrice = $this->priceManager->getAddonPriceForCurrency($item->getAddon());
+            $addonPrice = $this->priceManager->getAddonPriceForCurrency($item->getAddon(), $currency);
             if ($addonPrice) {
                 $addonPriceValue = $addonPrice->getPrice();
             }
