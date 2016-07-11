@@ -10,8 +10,8 @@
 
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
-use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
+use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
 
 /**
  * Calculates price of an item.
@@ -184,6 +184,15 @@ class ItemPriceCalculator
         $product = $item->getCalcProduct();
         $specialPriceValue = null;
         $bulkPriceValue = null;
+        $addonPriceValue = null;
+
+        // Get addon price.
+        if ($item->getAddon()) {
+            $addonPrice = $this->priceManager->getAddonPriceForCurrency($item->getAddon(), $currency);
+            if ($addonPrice) {
+                $addonPriceValue = $addonPrice->getPrice();
+            }
+        }
 
         // Get special price.
         $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
@@ -197,8 +206,10 @@ class ItemPriceCalculator
             $bulkPriceValue = $bulkPrice->getPrice();
         }
 
-        // Take the smallest.
-        if (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
+        if (!empty($addonPriceValue)) {
+            $priceValue = $addonPriceValue;
+        } elseif (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
+            // Take the smallest.
             $priceValue = $specialPriceValue;
             if ($specialPriceValue > $bulkPriceValue) {
                 $priceValue = $bulkPriceValue;

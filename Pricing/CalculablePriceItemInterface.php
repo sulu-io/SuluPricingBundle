@@ -13,14 +13,14 @@ interface CalculablePriceItemInterface
 {
     /**
      * returns price of item
-     * 
+     *
      * @return float
      */
     public function getCalcPrice();
     
     /**
      * returns quantity of items
-     * 
+     *
      * @return float
      */
     public function getCalcQuantity();
