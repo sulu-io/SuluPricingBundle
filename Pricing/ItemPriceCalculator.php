@@ -98,7 +98,7 @@ class ItemPriceCalculator
 
         $priceValue = $item->getPrice();
 
-        if ($useProductsPrice) {
+        if ($useProductsPrice && ($item->getCalcProduct() || $item->getAddon())) {
             $priceValue = $this->getValidProductPriceForItem($item, $currency);
         } elseif ($isGrossPrice) {
             // Handle gross prices.
@@ -179,7 +179,7 @@ class ItemPriceCalculator
      *
      * @return int
      */
-    private function getValidProductPriceForItem($item, $currency)
+    private function getValidProductPriceForItem(CalculableBulkPriceItemInterface $item, $currency)
     {
         $product = $item->getCalcProduct();
         $specialPriceValue = null;
@@ -194,22 +194,26 @@ class ItemPriceCalculator
             }
         }
 
-        // Get special price.
-        $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
-        if ($specialPrice) {
-            $specialPriceValue = $specialPrice->getPrice();
-        }
+        // Get price of product.
+        if ($product) {
+            // Get special price.
+            $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
+            if ($specialPrice) {
+                $specialPriceValue = $specialPrice->getPrice();
+            }
 
-        // Get bulk price.
-        $bulkPrice = $this->priceManager->getBulkPriceForCurrency($product, $item->getCalcQuantity(), $currency);
-        if ($bulkPrice) {
-            $bulkPriceValue = $bulkPrice->getPrice();
+            // Get bulk price.
+            $bulkPrice = $this->priceManager->getBulkPriceForCurrency($product, $item->getCalcQuantity(), $currency);
+            if ($bulkPrice) {
+                $bulkPriceValue = $bulkPrice->getPrice();
+            }
         }
 
         if (!empty($addonPriceValue)) {
+            // If addon price is defined, take that one.
             $priceValue = $addonPriceValue;
         } elseif (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
-            // Take the smallest.
+            // Else take the smallest product price.
             $priceValue = $specialPriceValue;
             if ($specialPriceValue > $bulkPriceValue) {
                 $priceValue = $bulkPriceValue;

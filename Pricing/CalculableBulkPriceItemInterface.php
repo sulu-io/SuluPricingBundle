@@ -9,6 +9,7 @@
  */
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
+use Sulu\Bundle\ProductBundle\Entity\Addon;
 use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
 
 interface CalculableBulkPriceItemInterface
@@ -82,4 +83,11 @@ interface CalculableBulkPriceItemInterface
      * @return bool
      */
     public function getUseProductsPrice();
+
+    /**
+     * Returns a product-addon relation.
+     *
+     * @return Addon
+     */
+    public function getAddon();
 }
