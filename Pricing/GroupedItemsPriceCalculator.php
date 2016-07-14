@@ -38,6 +38,7 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
         $currency = 'EUR'
     ) {
         $overallPrice = 0;
+        $overallRecurringPrice = 0;
 
         /** @var CalculableBulkPriceItemInterface $item */
         foreach ($items as $item) {
@@ -47,10 +48,17 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
             $this->addPriceToPriceGroup($itemPrice, $item, $groupPrices, $groupedItems);
 
             // add to overall price
-            $overallPrice += $itemPrice;
+            if ($item->isRecurringPrice()) {
+                $overallRecurringPrice += $itemPrice;
+            } else {
+                $overallPrice += $itemPrice;
+            }
         }
 
-        return $overallPrice;
+        return [
+            'totalPrice' => $overallPrice,
+            'totalRecurringPrice' => $overallRecurringPrice
+        ];
     }
 
     /**
