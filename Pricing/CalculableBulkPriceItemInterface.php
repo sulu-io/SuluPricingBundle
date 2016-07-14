@@ -90,4 +90,9 @@ interface CalculableBulkPriceItemInterface
      * @return Addon
      */
     public function getAddon();
+
+    /**
+     * @return bool
+     */
+    public function isRecurringPrice();
 }
