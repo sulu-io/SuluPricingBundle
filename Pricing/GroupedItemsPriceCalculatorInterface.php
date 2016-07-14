@@ -14,7 +14,7 @@ interface GroupedItemsPriceCalculatorInterface
     /**
      * calculate price of items array
      *
-     * @param array $items Array with PriceCalculationItems
+     * @param CalculableBulkPriceItemInterface[] $items Array with PriceCalculationItems
      * @param array $groupPrices Prices grouped by priceGroup
      * @param array $groupedItems Will be filled with items and prices
      * @param string $currencyCode The currency for which the price should be calculated
@@ -28,7 +28,8 @@ interface GroupedItemsPriceCalculatorInterface
      * Note: This will only work, if price changes have been calculated before. Since this is a service which can be
      *       called multiple times with many different items.
      *
-     * @param $items
+     * @param CalculableBulkPriceItemInterface[] $items
+     *
      * @return bool If prices have changed
      */
     public function setPricesOfChanged($items);

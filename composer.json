@@ -1,9 +1,9 @@
 {
     "name": "sulu/pricing-bundle",
     "type": "sulu-bundle",
-    "description": "TODO",
+    "description": "Handles price calculations",
     "license": "MIT",
-    "keywords": ["TODO"],
+    "keywords": ["sulu", "pricing"],
     "authors": [
         {
             "name": "Sulu Community",
@@ -26,6 +26,8 @@
         "symfony/symfony": "~2.5",
         "symfony/monolog-bundle": "2.4.*",
         "phpunit/phpunit": "4.1.*",
+        "zendframework/zend-stdlib": "2.3.1 as 2.0.0rc5",
+        "zendframework/zendsearch": "2.*@dev",
 
         "sulu/product-bundle": "~0.1",
         "sulu/sulu-sales": "dev-develop",
