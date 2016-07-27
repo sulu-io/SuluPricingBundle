@@ -1,7 +1,7 @@
 CHANGELOG for Sulu Pricing Bundle
 =================================
 
-* dev-develop
+* 0.4.1 (2016-07-27)
 
     * BUGFIX  Fixed calculation of addon items
     * FEATURE Added config for defining default currency for price calculation
