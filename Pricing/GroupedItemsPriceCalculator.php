@@ -21,11 +21,20 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
     protected $itemPriceCalculator;
 
     /**
-     * @param ItemPriceCalculator $itemPriceCalculator
+     * @var string
      */
-    public function __construct(ItemPriceCalculator $itemPriceCalculator)
-    {
+    private $defaultCurrencyCode;
+
+    /**
+     * @param ItemPriceCalculator $itemPriceCalculator
+     * @param string $defaultCurrencyCode
+     */
+    public function __construct(
+        ItemPriceCalculator $itemPriceCalculator,
+        $defaultCurrencyCode
+    ) {
         $this->itemPriceCalculator = $itemPriceCalculator;
+        $this->defaultCurrencyCode = $defaultCurrencyCode;
     }
 
     /**
@@ -33,12 +42,16 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
      */
     public function calculate(
         $items,
-        &$groupPrices = array(),
-        &$groupedItems = array(),
-        $currency = 'EUR'
+        &$groupPrices = [],
+        &$groupedItems = [],
+        $currency = null
     ) {
         $overallPrice = 0;
         $overallRecurringPrice = 0;
+
+        if (!$currency) {
+            $currency = $this->defaultCurrencyCode;
+        }
 
         /** @var CalculableBulkPriceItemInterface $item */
         foreach ($items as $item) {
@@ -57,7 +70,7 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
 
         return [
             'totalPrice' => $overallPrice,
-            'totalRecurringPrice' => $overallRecurringPrice
+            'totalRecurringPrice' => $overallRecurringPrice,
         ];
     }
 
@@ -103,9 +116,9 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
 
         // add to grouped items
         if (!isset($groupedItems[$itemPriceGroup])) {
-            $groupedItems[$itemPriceGroup] = array(
-                'items' => array()
-            );
+            $groupedItems[$itemPriceGroup] = [
+                'items' => [],
+            ];
             if (method_exists($item, 'getCalcPriceGroupContent') &&
                 $content = $item->getCalcPriceGroupContent()
             ) {

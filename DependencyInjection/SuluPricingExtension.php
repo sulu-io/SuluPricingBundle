@@ -36,5 +36,9 @@ class SuluPricingExtension extends Extension
             'sulu_pricing.item_manager_service',
             $config['item_manager_service']
         );
+        $container->setParameter(
+            'sulu_pricing.default_currency',
+            $config['default_currency']
+        );
     }
 }

@@ -11,6 +11,7 @@
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
+use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
 use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
 
 /**
@@ -182,37 +183,64 @@ class ItemPriceCalculator
     private function getValidProductPriceForItem(CalculableBulkPriceItemInterface $item, $currency)
     {
         $product = $item->getCalcProduct();
-        $specialPriceValue = null;
-        $bulkPriceValue = null;
-        $addonPriceValue = null;
+        $areGrossPrices = false;
 
         // Get addon price.
-        if ($item->getAddon()) {
+        $addon = $item->getAddon();
+        if ($addon) {
             $addonPrice = $this->priceManager->getAddonPriceForCurrency($item->getAddon(), $currency);
             if ($addonPrice) {
-                $addonPriceValue = $addonPrice->getPrice();
+                $priceValue = $addonPrice->getPrice();
+            } else {
+                $priceValue = $this->getPriceOfProduct($addon->getProduct(), $item->getCalcQuantity(), $currency);
+            }
+            $areGrossPrices = $addon->getAddon()->getAreGrossPrices();
+        } elseif ($product) {
+            $priceValue = $this->getPriceOfProduct($item->getCalcProduct(), $item->getCalcQuantity(), $currency);
+            $areGrossPrices = $product->getAreGrossPrices();
+        }
+
+        // If no price is set - return 0.
+        if (empty($priceValue)) {
+            return 0;
+        }
+
+        // Check if product price is gross price and return net price instead.
+        if ($areGrossPrices) {
+            $tax = $item->getTax();
+            if ($tax > 0) {
+                $priceValue = ($priceValue / (100 + $tax)) * 100;
             }
         }
 
-        // Get price of product.
-        if ($product) {
-            // Get special price.
-            $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
-            if ($specialPrice) {
-                $specialPriceValue = $specialPrice->getPrice();
-            }
+        return $priceValue;
+    }
 
-            // Get bulk price.
-            $bulkPrice = $this->priceManager->getBulkPriceForCurrency($product, $item->getCalcQuantity(), $currency);
-            if ($bulkPrice) {
-                $bulkPriceValue = $bulkPrice->getPrice();
-            }
+    /**
+     * @param ProductInterface $product
+     * @param float $quantity
+     * @param string|null $currency
+     *
+     * @return float|null
+     */
+    private function getPriceOfProduct(ProductInterface $product, $quantity, $currency)
+    {
+        $specialPriceValue = null;
+        $bulkPriceValue = null;
+
+        // Get special price.
+        $specialPrice = $this->priceManager->getSpecialPriceForCurrency($product, $currency);
+        if ($specialPrice) {
+            $specialPriceValue = $specialPrice->getPrice();
         }
 
-        if (!empty($addonPriceValue)) {
-            // If addon price is defined, take that one.
-            $priceValue = $addonPriceValue;
-        } elseif (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
+        // Get bulk price.
+        $bulkPrice = $this->priceManager->getBulkPriceForCurrency($product, $quantity, $currency);
+        if ($bulkPrice) {
+            $bulkPriceValue = $bulkPrice->getPrice();
+        }
+
+        if (!empty($specialPriceValue) && !empty($bulkPriceValue)) {
             // Else take the smallest product price.
             $priceValue = $specialPriceValue;
             if ($specialPriceValue > $bulkPriceValue) {
@@ -222,19 +250,6 @@ class ItemPriceCalculator
             $priceValue = $specialPriceValue;
         } else {
             $priceValue = $bulkPriceValue;
-        }
-
-        // If no price is set - return 0.
-        if (empty($priceValue)) {
-            return 0;
-        }
-
-        // Check if product price is gross price and return net price instead.
-        if ($product->getAreGrossPrices()) {
-            $tax = $item->getTax();
-            if ($tax > 0) {
-                $priceValue = ($priceValue / (100 + $tax)) * 100;
-            }
         }
 
         return $priceValue;

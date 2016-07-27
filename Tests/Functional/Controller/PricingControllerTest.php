@@ -126,19 +126,19 @@ class PricingControllerTest extends BaseTestCase
 
         $response = $client->getResponse();
         $this->assertEquals(200, $response->getStatusCode(), $response->getContent());
-        $response = json_decode($response->getContent());
+        $response = json_decode($response->getContent(), true);
 
         $totalNetPrice1 = $itemData[0]['price'] * $itemData[0]['quantity'];
         $totalNetPrice2 = $itemData[1]['price'] * $itemData[1]['quantity'];
         $totalNetPrice = $totalNetPrice1 + $totalNetPrice2;
 
-        $this->assertEquals($itemData[0]['price'], $response->items[0]->price);
+        $this->assertEquals($itemData[0]['price'], $response['items'][0]['price']);
 
-        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
-        $this->assertEquals($totalNetPrice += $totalNetPrice * 0.2, $response->totalPrice);
+        $this->assertEquals($totalNetPrice, $response['totalNetPrice']);
+        $this->assertEquals($totalNetPrice + $totalNetPrice * 0.2, $response['totalPrice']);
 
-        $taxes = get_object_vars($response->taxes);
-        $this->assertEquals($taxes['20'], 13.14);
+        $taxes = $response['taxes'];
+        $this->assertEquals($taxes[20], 13.14);
     }
 
     /**
