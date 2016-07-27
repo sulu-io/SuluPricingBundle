@@ -25,6 +25,7 @@ class Configuration implements ConfigurationInterface
             ->children()
                 ->scalarNode('priceformatter_digits')->defaultValue(2)->end()
                 ->scalarNode('item_manager_service')->defaultValue('sulu_sales_core.item_manager')->end()
+                ->scalarNode('default_currency')->defaultValue('EUR')->end()
             ->end()
         ;
 
