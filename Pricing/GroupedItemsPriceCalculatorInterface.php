@@ -21,7 +21,7 @@ interface GroupedItemsPriceCalculatorInterface
      *
      * @return float total-price of all items
      */
-    public function calculate($items, &$groupPrices = array(), &$groupedItems = array(), $currencyCode = 'EUR');
+    public function calculate($items, &$groupPrices = array(), &$groupedItems = array(), $currencyCode = null);
 
     /**
      * Sets all item prices to the changed prices

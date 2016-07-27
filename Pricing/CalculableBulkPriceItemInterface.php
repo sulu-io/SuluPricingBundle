@@ -15,7 +15,7 @@ use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
 interface CalculableBulkPriceItemInterface
 {
     /**
-     * Returns price of item for a certain quantity.
+     * Returns a product to calculate prices.
      *
      * @return ProductInterface
      */

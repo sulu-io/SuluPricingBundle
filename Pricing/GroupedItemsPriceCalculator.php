@@ -21,11 +21,21 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
     protected $itemPriceCalculator;
 
     /**
-     * @param ItemPriceCalculator $itemPriceCalculator
+     * @var string
      */
-    public function __construct(ItemPriceCalculator $itemPriceCalculator)
+    private $defaultCurrencyCode;
+
+    /**
+     * @param ItemPriceCalculator $itemPriceCalculator
+     * @param string $defaultCurrencyCode
+     */
+    public function __construct(
+        ItemPriceCalculator $itemPriceCalculator,
+        $defaultCurrencyCode
+    )
     {
         $this->itemPriceCalculator = $itemPriceCalculator;
+        $this->defaultCurrencyCode = $defaultCurrencyCode;
     }
 
     /**
@@ -35,10 +45,14 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
         $items,
         &$groupPrices = array(),
         &$groupedItems = array(),
-        $currency = 'EUR'
+        $currency = null
     ) {
         $overallPrice = 0;
         $overallRecurringPrice = 0;
+
+        if (!$currency) {
+            $currency = $this->defaultCurrencyCode;
+        }
 
         /** @var CalculableBulkPriceItemInterface $item */
         foreach ($items as $item) {
