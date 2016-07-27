@@ -17,7 +17,7 @@ sulu_pricing:
 Temporarily a version needs to be set in composer.json so that sulu-sales
 bundle can be installed:
 ```
-"version": "0.1",
+"version": "0.4",
 ```
 
 Then in terminal, run the following commands
