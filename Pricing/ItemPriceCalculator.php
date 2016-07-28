@@ -192,7 +192,7 @@ class ItemPriceCalculator
             if ($addonPrice) {
                 $priceValue = $addonPrice->getPrice();
             } else {
-                $priceValue = $this->getPriceOfProduct($addon->getProduct(), $item->getCalcQuantity(), $currency);
+                $priceValue = $this->getPriceOfProduct($addon->getAddon(), $item->getCalcQuantity(), $currency);
             }
             $areGrossPrices = $addon->getAddon()->getAreGrossPrices();
         } elseif ($product) {
