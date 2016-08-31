@@ -27,7 +27,7 @@
         </service>
 
         <service id="sulu_pricing.formatter" class="%sulu_pricing.formatter.class%">
-            <argument>%website_locale%</argument>
+            <argument>%sulu_pricing.default_locale%</argument>
             <argument>%sulu_pricing.priceformatter_digits%</argument>
         </service>
     </services>

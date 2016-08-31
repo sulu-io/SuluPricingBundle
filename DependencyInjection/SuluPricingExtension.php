@@ -29,16 +29,20 @@ class SuluPricingExtension extends Extension
         $loader->load('services.xml');
 
         $container->setParameter(
-            'sulu_pricing.priceformatter_digits',
-            $config['priceformatter_digits']
+            'sulu_pricing.default_currency',
+            $config['default_currency']
+        );
+        $container->setParameter(
+            'sulu_pricing.default_locale',
+            $config['default_locale']
         );
         $container->setParameter(
             'sulu_pricing.item_manager_service',
             $config['item_manager_service']
         );
         $container->setParameter(
-            'sulu_pricing.default_currency',
-            $config['default_currency']
+            'sulu_pricing.priceformatter_digits',
+            $config['priceformatter_digits']
         );
     }
 }
