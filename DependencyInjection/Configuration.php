@@ -23,9 +23,10 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root('sulu_pricing')
             ->children()
-                ->scalarNode('priceformatter_digits')->defaultValue(2)->end()
-                ->scalarNode('item_manager_service')->defaultValue('sulu_sales_core.item_manager')->end()
                 ->scalarNode('default_currency')->defaultValue('EUR')->end()
+                ->scalarNode('default_locale')->defaultValue('en')->end()
+                ->scalarNode('item_manager_service')->defaultValue('sulu_sales_core.item_manager')->end()
+                ->scalarNode('priceformatter_digits')->defaultValue(2)->end()
             ->end()
         ;
 
