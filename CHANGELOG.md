@@ -1,6 +1,10 @@
 CHANGELOG for Sulu Pricing Bundle
 =================================
 
+* dev-develop
+
+    * FEATURE Moved manager to own folder
+
 * 0.4.2 (2016-07-28)
 
     * BUGFIX  Fixed calculation of addon items
