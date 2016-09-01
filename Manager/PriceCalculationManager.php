@@ -8,9 +8,10 @@
  * with this source code in the file LICENSE.
  */
 
-namespace Sulu\Bundle\PricingBundle\Pricing;
+namespace Sulu\Bundle\PricingBundle\Manager;
 
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
+use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
 
 /**
  * Calculates price of an item.

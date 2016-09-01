@@ -5,7 +5,7 @@
         <parameter key="sulu_pricing.grouped_price_calculator.class">Sulu\Bundle\PricingBundle\Pricing\GroupedItemsPriceCalculator</parameter>
         <parameter key="sulu_pricing.item_price_calculator.class">Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator</parameter>
         <parameter key="sulu_pricing.formatter.class">Sulu\Bundle\PricingBundle\Pricing\PriceFormatter</parameter>
-        <parameter key="sulu_pricing.price_calculation_manager.class">Sulu\Bundle\PricingBundle\Pricing\PriceCalculationManager</parameter>
+        <parameter key="sulu_pricing.price_calculation_manager.class">Sulu\Bundle\PricingBundle\Manager\PriceCalculationManager</parameter>
     </parameters>
 
     <services>
