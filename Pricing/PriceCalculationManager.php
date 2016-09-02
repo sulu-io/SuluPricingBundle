@@ -10,6 +10,7 @@
 
 namespace Sulu\Bundle\PricingBundle\Pricing;
 
+use Sulu\Bundle\PricingBundle\Manager\CalculableItemManager;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 
 /**
@@ -23,24 +24,19 @@ class PriceCalculationManager
     private $itemPriceCalculator;
 
     /**
-     * @var null|\Sulu\Bundle\Sales\CoreBundle\Item\ItemManager
+     * @var CalculableItemManager
      */
     private $itemManager;
 
     /**
      * @param ItemPriceCalculator $itemPriceCalculator
+     * @param CalculableItemManager $itemManager
      */
     public function __construct(
-        ItemPriceCalculator $itemPriceCalculator
+        ItemPriceCalculator $itemPriceCalculator,
+        CalculableItemManager $itemManager
     ) {
         $this->itemPriceCalculator = $itemPriceCalculator;
-    }
-
-    /**
-     * @param null|\Sulu\Bundle\Sales\CoreBundle\Item\ItemManager $itemManager
-     */
-    public function setItemManager($itemManager)
-    {
         $this->itemManager = $itemManager;
     }
 
@@ -72,7 +68,10 @@ class PriceCalculationManager
             $itemData = $this->setDefaultData($itemData);
             $itemData = $this->unsetUneccesaryData($itemData);
 
-            $item = $this->getItemManager()->save($itemData, $locale);
+            //$item = $this->getItemManager()->save($itemData, $locale);
+
+           $item = $this->getItemManager()->createCalculableItem($itemData);
+
             $itemPrice = $calculator->getItemPrice(
                 $item,
                 $currency,
@@ -173,7 +172,7 @@ class PriceCalculationManager
      *
      * @throws PriceCalculationException
      *
-     * @return \Sulu\Bundle\Sales\CoreBundle\Item\ItemManager
+     * @return CalculableItemManager
      */
     private function getItemManager()
     {
