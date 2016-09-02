@@ -34,7 +34,6 @@ class PricingController extends RestController implements ClassResourceInterface
         try {
             $data = $request->request->all();
             $this->validatePostData($data);
-            $locale = $this->getLocale($request);
 
             // Set taxfree to false by default.
             $taxfree = false;
@@ -46,8 +45,7 @@ class PricingController extends RestController implements ClassResourceInterface
             $prices = $this->getPriceCalculationManager()->calculateItemPrices(
                 $data['items'],
                 $data['currency'],
-                $taxfree,
-                $locale
+                $taxfree
             );
 
             $view = $this->view($prices, 200);

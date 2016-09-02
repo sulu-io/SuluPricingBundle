@@ -46,11 +46,10 @@ class PriceCalculationManager
      * @param array $itemsData
      * @param string $currency
      * @param bool $taxfree
-     * @param string $locale
      *
      * @return array
      */
-    public function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
+    public function calculateItemPrices($itemsData, $currency, $taxfree)
     {
         $calculator = $this->itemPriceCalculator;
         $totalNetPrice = 0;
@@ -67,8 +66,6 @@ class PriceCalculationManager
             // Add and remove necessary data for calculation.
             $itemData = $this->setDefaultData($itemData);
             $itemData = $this->unsetUneccesaryData($itemData);
-
-            //$item = $this->getItemManager()->save($itemData, $locale);
 
            $item = $this->getItemManager()->createCalculableItem($itemData);
 

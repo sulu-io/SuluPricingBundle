@@ -11,10 +11,14 @@
 
 namespace Sulu\Bundle\PricingBundle\Model;
 
+use JMS\Serializer\Annotation as Serializer;
 use Sulu\Bundle\PricingBundle\Pricing\CalculableBulkPriceItemInterface;
 use Sulu\Bundle\PricingBundle\Pricing\CalculablePriceGroupItemInterface;
 use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
 
+/**
+ * @Serializer\ExclusionPolicy("all")
+ */
 class CalculableItem implements CalculableBulkPriceItemInterface, CalculablePriceGroupItemInterface
 {
     private $addon;
@@ -22,20 +26,15 @@ class CalculableItem implements CalculableBulkPriceItemInterface, CalculablePric
     private $discount;
     private $isRecurringPrice;
     private $price;
-    private $priceChange;
-    private $priceGroup;
-    private $priceGroupContent;
     private $product;
     private $quantity;
     private $tax;
     private $useProductsPrice;
+    private $totalNetPrice;
 
     public function __construct(
         $quantity,
         $price,
-//        $priceChange,
-//        $priceGroup,
-//        $priceGroupContent,
         $discount,
         $tax,
         $currencyCode,
@@ -46,9 +45,6 @@ class CalculableItem implements CalculableBulkPriceItemInterface, CalculablePric
     ) {
         $this->quantity = $quantity;
         $this->price = $price;
-//        $this->priceChange = $priceChange;
-//        $this->priceGroup = $priceGroup;
-//        $this->priceGroupContent = $priceGroupContent;
         $this->isRecurringPrice = $isRecurringPrice;
         $this->discount = $discount;
         $this->tax = $tax;
@@ -128,5 +124,13 @@ class CalculableItem implements CalculableBulkPriceItemInterface, CalculablePric
         return null;
     }
 
+    public function getTotalNetPrice()
+    {
+        return $this->totalNetPrice;
+    }
 
+    public function setTotalNetPrice($totalNetPrice)
+    {
+        $this->totalNetPrice = $totalNetPrice;
+    }
 }

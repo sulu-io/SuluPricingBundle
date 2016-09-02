@@ -58,6 +58,13 @@ interface CalculableBulkPriceItemInterface
     public function getPrice();
 
     /**
+     * @param float $totalNetPrice
+     *
+     * @return self
+     */
+    public function setTotalNetPrice($totalNetPrice);
+
+    /**
      * @param float $price
      *
      * @return self
