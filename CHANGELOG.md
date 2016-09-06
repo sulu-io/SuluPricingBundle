@@ -1,7 +1,7 @@
 CHANGELOG for Sulu Pricing Bundle
 =================================
 
-* dev-develop
+* 0.5.0 (2016-09-06)
 
     * FEATURE Adapted GroupedItemsPriceCalculator: Calculates now all prices
               (totalPrice, totalNetPrice, totalRecurringPrice, totalRecurringNetPrice, shippingCosts, taxes) 
