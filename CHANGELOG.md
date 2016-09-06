@@ -3,7 +3,7 @@ CHANGELOG for Sulu Pricing Bundle
 
 * dev-develop
 
-    * FEATURE Adopted GroupedItemsPriceCalculator: Calculates now all prices
+    * FEATURE Adapted GroupedItemsPriceCalculator: Calculates now all prices
               (totalPrice, totalNetPrice, totalRecurringPrice, totalRecurringNetPrice, shippingCosts, taxes) 
     * FEATURE Refactored PriceCalculationManager: Moved calculation to ItemPriceCalculator
     * FEATURE Moved manager to own folder
