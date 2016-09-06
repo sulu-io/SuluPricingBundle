@@ -41,10 +41,10 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
      * {@inheritdoc}
      */
     public function calculate(
-        $items,
+        array $items,
         $netShippingCosts,
-        &$groupPrices = [],
-        &$groupedItems = [],
+        array &$groupPrices = [],
+        array &$groupedItems = [],
         $currency = null,
         $taxfree = false
     ) {
@@ -91,7 +91,7 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
             }
         }
 
-        // Calc shipping costs.
+        // Calculate shipping costs.
         $shippingCostsTax = 0;
         if (!$taxfree) {
             /** @var CalculableBulkPriceItemInterface $item */
@@ -113,7 +113,7 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
                     }
 
                     $taxValue = $ratio * $netShippingCosts * $item->getTax() / 100;
-                    $taxes[$tax] = $taxValue;
+                    $taxes[$tax] += $taxValue;
                     $shippingCostsTax += $taxValue;
                 }
             }

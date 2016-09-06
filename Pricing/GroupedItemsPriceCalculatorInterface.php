@@ -24,10 +24,10 @@ interface GroupedItemsPriceCalculatorInterface
      * @return float total-price of all items
      */
     public function calculate(
-        $items,
+        array $items,
         $netShippingCosts,
-        &$groupPrices = array(),
-        &$groupedItems = array(),
+        array &$groupPrices = array(),
+        array &$groupedItems = array(),
         $currencyCode = null,
         $taxfree = false
     );
