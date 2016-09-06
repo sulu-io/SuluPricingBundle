@@ -41,13 +41,18 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
      * {@inheritdoc}
      */
     public function calculate(
-        $items,
-        &$groupPrices = [],
-        &$groupedItems = [],
-        $currency = null
+        array $items,
+        $netShippingCosts,
+        array &$groupPrices = [],
+        array &$groupedItems = [],
+        $currency = null,
+        $taxfree = false
     ) {
-        $overallPrice = 0;
-        $overallRecurringPrice = 0;
+        $totalNetPriceExclShippingCosts = 0;
+        $totalPrice = 0;
+        $totalRecurringNetPrice = 0;
+        $totalRecurringPrice = 0;
+        $taxes = [];
 
         if (!$currency) {
             $currency = $this->defaultCurrencyCode;
@@ -55,22 +60,78 @@ class GroupedItemsPriceCalculator implements GroupedItemsPriceCalculatorInterfac
 
         /** @var CalculableBulkPriceItemInterface $item */
         foreach ($items as $item) {
-            $itemPrice = $this->itemPriceCalculator->calculate($item, $currency, $item->getUseProductsPrice());
+            $itemTotalNetPrice = $this->itemPriceCalculator->calculateItemTotalNetPrice(
+                $item,
+                $currency,
+                $item->getUseProductsPrice()
+            );
 
-            // add total-item-price to group
-            $this->addPriceToPriceGroup($itemPrice, $item, $groupPrices, $groupedItems);
+            // Add total-item-price to group.
+            $this->addPriceToPriceGroup($itemTotalNetPrice, $item, $groupPrices, $groupedItems);
 
-            // add to overall price
+            // Calculate Taxes.
+            $taxValue = 0;
+            if (!$taxfree) {
+                $taxValue = $itemTotalNetPrice * $item->getTax() / 100.0;
+                $tax = (string)$item->getTax();
+                if (array_key_exists($tax, $taxes)) {
+                    $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
+                } else {
+                    $taxes[$tax] = $taxValue;
+                }
+            }
+
+            // Add to total price.
             if ($item->isRecurringPrice()) {
-                $overallRecurringPrice += $itemPrice;
+                $totalRecurringNetPrice += $itemTotalNetPrice;
+                $totalRecurringPrice += $itemTotalNetPrice + $taxValue;
             } else {
-                $overallPrice += $itemPrice;
+                $totalNetPriceExclShippingCosts += $itemTotalNetPrice;
+                $totalPrice += $itemTotalNetPrice + $taxValue;
             }
         }
 
+        // Calculate shipping costs.
+        $shippingCostsTax = 0;
+        if (!$taxfree) {
+            /** @var CalculableBulkPriceItemInterface $item */
+            foreach ($items as $item) {
+                if (!$item->isRecurringPrice()) {
+                    $itemTotalNetPrice = $this->itemPriceCalculator->calculateItemTotalNetPrice(
+                        $item,
+                        $currency,
+                        $item->getUseProductsPrice()
+                    );
+                    $tax = (string)$item->getTax();
+
+                    $ratio = 0;
+                    if ($totalNetPriceExclShippingCosts != 0) {
+                        $ratio = $itemTotalNetPrice / $totalNetPriceExclShippingCosts;
+                    } else if (count($items) > 0) {
+                        // Handle total net price of 0. Each item has the same ratio.
+                        $ratio = 1 / count($items);
+                    }
+
+                    $taxValue = $ratio * $netShippingCosts * $item->getTax() / 100;
+                    $taxes[$tax] += $taxValue;
+                    $shippingCostsTax += $taxValue;
+                }
+            }
+        }
+        $shippingCosts = $netShippingCosts + $shippingCostsTax;
+
+        // Add net shipping costs to total prices.
+        $totalPrice += $shippingCosts;
+        $totalNetPrice = $totalNetPriceExclShippingCosts + $netShippingCosts;
+
         return [
-            'totalPrice' => $overallPrice,
-            'totalRecurringPrice' => $overallRecurringPrice,
+            'totalNetPriceExclShippingCosts' => $totalNetPriceExclShippingCosts,
+            'totalNetPrice' => $totalNetPrice,
+            'totalPrice' => $totalPrice,
+            'totalRecurringNetPrice' => $totalRecurringNetPrice,
+            'totalRecurringPrice' => $totalRecurringPrice,
+            'shippingCosts' => $shippingCosts,
+            'taxes' => $taxes,
         ];
     }
 

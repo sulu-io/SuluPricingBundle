@@ -15,7 +15,7 @@
         </service>
 
         <service id="sulu_pricing.price_calculation_manager" class="%sulu_pricing.price_calculation_manager.class%">
-            <argument type="service" id="sulu_pricing.item_price_calculator"/>
+            <argument type="service" id="sulu_pricing.item_price_calculator" />
             <call method="setItemManager">
                 <argument type="expression">service(container.hasParameter('sulu_pricing.item_manager_service') ? parameter('sulu_pricing.item_manager_service') : '')</argument>
             </call>
