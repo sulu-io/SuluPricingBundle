@@ -13,9 +13,6 @@ namespace Sulu\Bundle\PricingBundle\Manager;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
 
-/**
- * Calculates price of an item.
- */
 class PriceCalculationManager
 {
     /**
@@ -46,23 +43,19 @@ class PriceCalculationManager
     }
 
     /**
-     * Calculates prices of all items given in data array.
+     * Calculates total prices of all items given in data array.
      *
      * @param array $itemsData
      * @param string $currency
-     * @param bool $taxfree
      * @param string $locale
      *
      * @return array
      */
-    public function calculateItemPrices($itemsData, $currency, $taxfree, $locale)
+    public function retrieveItemPrices($itemsData, $currency, $locale)
     {
-        $calculator = $this->itemPriceCalculator;
-        $totalNetPrice = 0;
-        $totalPrice = 0;
         $items = [];
-        $taxes = [];
 
+        // Prepare item data.
         foreach ($itemsData as $itemData) {
             $useProductsPrice = false;
             if (isset($itemData['useProductsPrice']) && $itemData['useProductsPrice'] == true) {
@@ -73,45 +66,31 @@ class PriceCalculationManager
             $itemData = $this->setDefaultData($itemData);
             $itemData = $this->unsetUneccesaryData($itemData);
 
+            // Generate item.
             $item = $this->getItemManager()->save($itemData, $locale);
-            $itemPrice = $calculator->getItemPrice(
+            $item->setUseProductsPrice($useProductsPrice);
+
+            // Calculate total net price of item.
+            $itemPrice = $this->itemPriceCalculator->calculateItemNetPrice(
                 $item,
                 $currency,
                 $useProductsPrice,
                 $this->isItemGrossPrice($itemData)
             );
-            $itemTotalPrice = $calculator->calculate(
+            $itemTotalNetPrice = $this->itemPriceCalculator->calculateItemTotalNetPrice(
                 $item,
                 $currency,
                 $useProductsPrice,
                 $this->isItemGrossPrice($itemData)
             );
             $item->setPrice($itemPrice);
-            $item->setTotalNetPrice($itemTotalPrice);
-
-            $totalPrice += $itemTotalPrice;
-
-            // Calculate Taxes.
-            if (!$taxfree) {
-                $taxValue = $itemPrice * $item->getTax() / 100.0 * $item->getCalcQuantity();
-                $totalPrice += $taxValue;
-                $tax = (string)$item->getTax();
-                if (array_key_exists($tax, $taxes)) {
-                    $taxes[$tax] = (float)$taxes[$tax] + $taxValue;
-                } else {
-                    $taxes[$tax] = $taxValue;
-                }
-            }
+            $item->setTotalNetPrice($itemTotalNetPrice);
 
             $items[] = $item;
-            $totalNetPrice += $itemTotalPrice;
         }
 
         return [
-            'totalNetPrice' => $totalNetPrice,
-            'taxes' => $taxes,
-            'totalPrice' => $totalPrice,
-            'items' => $items,
+            'items' => $items
         ];
     }
 

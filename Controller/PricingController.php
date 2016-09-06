@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Sulu\Component\Rest\RestController;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
-use Sulu\Bundle\PricingBundle\Pricing\PriceCalculationManager;
+use Sulu\Bundle\PricingBundle\Manager\PriceCalculationManager;
 
 /**
  * Handles price calculations by api.
@@ -23,7 +23,7 @@ use Sulu\Bundle\PricingBundle\Pricing\PriceCalculationManager;
 class PricingController extends RestController implements ClassResourceInterface
 {
     /**
-     * Calculate pricing of an array of items.
+     * Calculates total prices of all given items.
      *
      * @param Request $request
      *
@@ -36,21 +36,14 @@ class PricingController extends RestController implements ClassResourceInterface
             $this->validatePostData($data);
             $locale = $this->getLocale($request);
 
-            // Set taxfree to false by default.
-            $taxfree = false;
-            if (isset($data['taxfree'])) {
-                $taxfree = $data['taxfree'];
-            }
-
-            // Calculate prices for all given items.
-            $prices = $this->getPriceCalculationManager()->calculateItemPrices(
+            // Calculate prices for given item
+            $price = $this->getPriceCalculationManager()->retrieveItemPrices(
                 $data['items'],
                 $data['currency'],
-                $taxfree,
                 $locale
             );
 
-            $view = $this->view($prices, 200);
+            $view = $this->view($price, 200);
         } catch (PriceCalculationException $pce) {
             $view = $this->view($pce->getMessage(), 400);
         }

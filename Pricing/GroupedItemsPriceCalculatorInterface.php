@@ -15,13 +15,22 @@ interface GroupedItemsPriceCalculatorInterface
      * calculate price of items array
      *
      * @param CalculableBulkPriceItemInterface[] $items Array with PriceCalculationItems
+     * @param float $netShippingCosts
      * @param array $groupPrices Prices grouped by priceGroup
      * @param array $groupedItems Will be filled with items and prices
      * @param string $currencyCode The currency for which the price should be calculated
+     * @param bool $taxfree
      *
      * @return float total-price of all items
      */
-    public function calculate($items, &$groupPrices = array(), &$groupedItems = array(), $currencyCode = null);
+    public function calculate(
+        $items,
+        $netShippingCosts,
+        &$groupPrices = array(),
+        &$groupedItems = array(),
+        $currencyCode = null,
+        $taxfree = false
+    );
 
     /**
      * Sets all item prices to the changed prices

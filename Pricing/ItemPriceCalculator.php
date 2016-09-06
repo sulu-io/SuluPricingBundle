@@ -47,13 +47,13 @@ class ItemPriceCalculator
      * @param CalculableBulkPriceItemInterface $item
      * @param string|null $currency
      * @param bool|null $useProductsPrice
-     * @param bool $isGrossPrice
+     * @param bool|null $isGrossPrice
      *
      * @return float
      */
-    public function calculate($item, $currency = null, $useProductsPrice = true, $isGrossPrice = false)
+    public function calculateItemTotalNetPrice($item, $currency = null, $useProductsPrice = true, $isGrossPrice = false)
     {
-        $priceValue = $this->getItemPrice($item, $currency, $useProductsPrice, $isGrossPrice);
+        $priceValue = $this->calculateItemNetPrice($item, $currency, $useProductsPrice, $isGrossPrice);
 
         if ($priceValue === null) {
             $priceValue = 0;
@@ -80,13 +80,13 @@ class ItemPriceCalculator
      * @param CalculableBulkPriceItemInterface $item
      * @param null|string $currency
      * @param null|bool $useProductsPrice
-     * @param bool $isGrossPrice
+     * @param bool|null $isGrossPrice
      *
      * @throws PriceCalculationException
      *
      * @return float
      */
-    public function getItemPrice($item, $currency = null, $useProductsPrice = null, $isGrossPrice = false)
+    public function calculateItemNetPrice($item, $currency = null, $useProductsPrice = null, $isGrossPrice = false)
     {
         $currency = $this->getCurrency($currency);
 
@@ -100,7 +100,7 @@ class ItemPriceCalculator
         $priceValue = $item->getPrice();
 
         if ($useProductsPrice && ($item->getCalcProduct() || $item->getAddon())) {
-            $priceValue = $this->getValidProductPriceForItem($item, $currency);
+            $priceValue = $this->getValidProductNetPriceForItem($item, $currency);
         } elseif ($isGrossPrice) {
             // Handle gross prices.
             $tax = $item->getTax();
@@ -173,14 +173,14 @@ class ItemPriceCalculator
     }
 
     /**
-     * Returns the valid product price for item.
+     * Returns the valid product net price for item.
      *
      * @param CalculableBulkPriceItemInterface $item
      * @param string $currency
      *
      * @return int
      */
-    private function getValidProductPriceForItem(CalculableBulkPriceItemInterface $item, $currency)
+    private function getValidProductNetPriceForItem(CalculableBulkPriceItemInterface $item, $currency)
     {
         $product = $item->getCalcProduct();
         $areGrossPrices = false;
