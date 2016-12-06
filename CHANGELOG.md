@@ -1,7 +1,7 @@
 CHANGELOG for Sulu Pricing Bundle
 =================================
 
-* dev-develop
+* 0.5.1 (2016-12-06)
     * BUGFIX  Fixed price calculation of addon items.
 
 * 0.5.0 (2016-09-06)
