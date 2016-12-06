@@ -11,11 +11,11 @@
 namespace Sulu\Bundle\PricingBundle\Controller;
 
 use FOS\RestBundle\Routing\ClassResourceInterface;
+use Sulu\Bundle\PricingBundle\Manager\PriceCalculationManager;
+use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
+use Sulu\Component\Rest\RestController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Sulu\Component\Rest\RestController;
-use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
-use Sulu\Bundle\PricingBundle\Manager\PriceCalculationManager;
 
 /**
  * Handles price calculations by api.

@@ -12,6 +12,7 @@ namespace Sulu\Bundle\PricingBundle\Manager;
 
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
+use Sulu\Bundle\Sales\CoreBundle\Entity\Item;
 
 class PriceCalculationManager
 {
@@ -54,6 +55,7 @@ class PriceCalculationManager
     public function retrieveItemPrices($itemsData, $currency, $locale)
     {
         $items = [];
+        $previousItem = null;
 
         // Prepare item data.
         foreach ($itemsData as $itemData) {
@@ -67,7 +69,7 @@ class PriceCalculationManager
             $itemData = $this->unsetUneccesaryData($itemData);
 
             // Generate item.
-            $item = $this->getItemManager()->save($itemData, $locale);
+            $item = $this->getItemManager()->save($itemData, $locale, null, null, null, null, $previousItem);
             $item->setUseProductsPrice($useProductsPrice);
 
             // Calculate total net price of item.
@@ -86,11 +88,16 @@ class PriceCalculationManager
             $item->setPrice($itemPrice);
             $item->setTotalNetPrice($itemTotalNetPrice);
 
+            // Save the last processed product item to calculate addon prices.
+            if (Item::TYPE_ADDON !== $item->getType()) {
+                $previousItem = $item->getEntity();
+            }
+
             $items[] = $item;
         }
 
         return [
-            'items' => $items
+            'items' => $items,
         ];
     }
 
