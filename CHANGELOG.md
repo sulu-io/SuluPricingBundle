@@ -1,6 +1,9 @@
 CHANGELOG for Sulu Pricing Bundle
 =================================
 
+* dev-develop
+    * FEATURE Implemented price caluclation of variants parent product addon relation.
+
 * 0.5.1 (2016-12-06)
     * BUGFIX  Fixed price calculation of addon items.
 
