@@ -12,7 +12,6 @@ namespace Sulu\Bundle\PricingBundle\Pricing;
 
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 use Sulu\Bundle\ProductBundle\Entity\ProductInterface;
-use Sulu\Bundle\ProductBundle\Entity\Type;
 use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
 
 /**
@@ -20,6 +19,8 @@ use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
  */
 class ItemPriceCalculator
 {
+    const PRODUCT_VARIANT_KEY = 'PRODUCT_VARIANT';
+
     /**
      * @var ProductPriceManagerInterface
      */
@@ -263,7 +264,7 @@ class ItemPriceCalculator
 
         // If product has no price check if it's a product variant. Then get price of product parent.
         if (!$priceValue
-            && $product->getType()->getId() === $this->retrieveProductTypeIdByKey('PRODUCT_VARIANT')
+            && $product->getType()->getId() === $this->retrieveProductTypeIdByKey(self::PRODUCT_VARIANT_KEY)
             && $product->getParent()
         ) {
             $priceValue = $this->getPriceOfProduct($product->getParent(), $quantity, $currency);
