@@ -13,6 +13,7 @@ namespace Sulu\Bundle\PricingBundle\Manager;
 use Sulu\Bundle\PricingBundle\Pricing\Exceptions\PriceCalculationException;
 use Sulu\Bundle\PricingBundle\Pricing\ItemPriceCalculator;
 use Sulu\Bundle\Sales\CoreBundle\Entity\Item;
+use Sulu\Bundle\Sales\CoreBundle\Entity\ItemInterface;
 
 class PriceCalculationManager
 {
@@ -69,6 +70,7 @@ class PriceCalculationManager
             $itemData = $this->unsetUneccesaryData($itemData);
 
             // Generate item.
+            /** @var ItemInterface $item */
             $item = $this->getItemManager()->save($itemData, $locale, null, null, null, null, $previousItem);
             $item->setUseProductsPrice($useProductsPrice);
 

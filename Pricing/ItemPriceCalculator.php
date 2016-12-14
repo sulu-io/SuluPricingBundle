@@ -19,6 +19,8 @@ use Sulu\Bundle\ProductBundle\Product\ProductPriceManagerInterface;
  */
 class ItemPriceCalculator
 {
+    const PRODUCT_VARIANT_KEY = 'PRODUCT_VARIANT';
+
     /**
      * @var ProductPriceManagerInterface
      */
@@ -30,15 +32,23 @@ class ItemPriceCalculator
     protected $defaultLocale;
 
     /**
+     * @var array
+     */
+    private $productTypesMap;
+
+    /**
      * @param ProductPriceManagerInterface $priceManager
      * @param string $defaultLocale
+     * @param array $productTypesMap
      */
     public function __construct(
         ProductPriceManagerInterface $priceManager,
-        $defaultLocale
+        $defaultLocale,
+        array $productTypesMap
     ) {
         $this->priceManager = $priceManager;
         $this->defaultLocale = $defaultLocale;
+        $this->productTypesMap = $productTypesMap;
     }
 
     /**
@@ -252,6 +262,30 @@ class ItemPriceCalculator
             $priceValue = $bulkPriceValue;
         }
 
+        // If product has no price check if it's a product variant. Then get price of product parent.
+        if (!$priceValue
+            && $product->getType()->getId() === $this->retrieveProductTypeIdByKey(self::PRODUCT_VARIANT_KEY)
+            && $product->getParent()
+        ) {
+            $priceValue = $this->getPriceOfProduct($product->getParent(), $quantity, $currency);
+        }
+
         return $priceValue;
+    }
+
+    /**
+     * Returns product type id by key.
+     *
+     * @param string $key
+     *
+     * @return int
+     */
+    private function retrieveProductTypeIdByKey($key)
+    {
+        if (!isset($this->productTypesMap[$key])) {
+            return null;
+        }
+
+        return intval($this->productTypesMap[$key]);
     }
 }

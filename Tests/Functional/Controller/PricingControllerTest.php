@@ -90,17 +90,6 @@ class PricingControllerTest extends BaseTestCase
             $response->items[0]->totalNetPrice,
             'Wrong item net price'
         );
-        // Since the taxfree flag is true, the net price equals the total price.
-        $this->assertEquals(
-            $totalNetPrice,
-            $response->totalNetPrice,
-            'Wrong total net price'
-        );
-        $this->assertEquals(
-            $totalNetPrice,
-            $response->totalPrice,
-            'Wrong total price'
-        );
     }
 
     /**
@@ -133,12 +122,6 @@ class PricingControllerTest extends BaseTestCase
         $totalNetPrice = $totalNetPrice1 + $totalNetPrice2;
 
         $this->assertEquals($itemData[0]['price'], $response['items'][0]['price']);
-
-        $this->assertEquals($totalNetPrice, $response['totalNetPrice']);
-        $this->assertEquals($totalNetPrice + $totalNetPrice * 0.2, $response['totalPrice']);
-
-        $taxes = $response['taxes'];
-        $this->assertEquals($taxes[20], 13.14);
     }
 
     /**
@@ -165,19 +148,6 @@ class PricingControllerTest extends BaseTestCase
 
         $response = $client->getResponse();
         $this->assertEquals(200, $response->getStatusCode(), $response->getContent());
-        $response = json_decode($response->getContent());
-
-        $totalNetPrice = 0;
-        foreach ($itemData as $index => $data) {
-            $this->assertEquals($itemData[$index]['price'], $response->items[$index]->price);
-            $this->assertEquals(
-                $itemData[$index]['price'] * $itemData[$index]['quantity'],
-                $response->items[$index]->totalNetPrice
-            );
-            $totalNetPrice += $response->items[$index]->totalNetPrice;
-        }
-
-        $this->assertEquals($totalNetPrice, $response->totalNetPrice);
     }
 
     /**
