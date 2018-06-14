@@ -2,7 +2,7 @@ CHANGELOG for Sulu Pricing Bundle
 =================================
 
 * 0.5.3 (2018-06-14)
-    * FEATURE Fixed price calculation for variants by using information from the parent.
+    * BUGFIX Fixed price calculation for variants by using information from the parent.
 
 * 0.5.2 (2016-12-14)
     * FEATURE Implemented price caluclation of variants parent product addon relation.
