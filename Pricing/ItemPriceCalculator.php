@@ -208,6 +208,10 @@ class ItemPriceCalculator
         } elseif ($product) {
             $priceValue = $this->getPriceOfProduct($item->getCalcProduct(), $item->getCalcQuantity(), $currency);
             $areGrossPrices = $product->getAreGrossPrices();
+
+            if ($product->getParent()) {
+                $areGrossPrices = $product->getParent()->getAreGrossPrices();
+            }
         }
 
         // If no price is set - return 0.
